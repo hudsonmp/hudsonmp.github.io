@@ -65,7 +65,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/library/";
           },
-        },{id: "post-why-do-we-learn-stem",
+        },{id: "post-transforming-societies",
+        
+          title: "Transforming Societies",
+        
+        description: "On optimizing for transformational impact rather than positive impact.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/transforming-societies/";
+          
+        },
+      },{id: "post-why-do-we-learn-stem",
         
           title: "Why do we Learn STEM?",
         
