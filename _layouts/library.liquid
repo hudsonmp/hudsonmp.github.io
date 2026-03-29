@@ -3,59 +3,91 @@ layout: page
 ---
 {{ content }}
 
-<!-- Books Section -->
-<h2><i class="fa-solid fa-book"></i> Books</h2>
-
 {% if page.collection and page.collection.size > 0 %}
   {% assign collection = site[page.collection] %}
   {% if collection and collection.size > 0 %}
-    <div class="library-grid">
+
+<svg style="position:absolute;inset:0;visibility:hidden">
+  <defs>
+    <filter id="paper" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="8" result="noise"/>
+      <feDiffuseLighting in="noise" lightingColor="white" surfaceScale="1" result="diffLight">
+        <feDistantLight azimuth="45" elevation="35"/>
+      </feDiffuseLighting>
+    </filter>
+  </defs>
+</svg>
+
+<div class="bookshelf-wrapper">
+  <button class="bookshelf-arrow bookshelf-arrow-left" id="scroll-left" aria-label="Scroll left">
+    <i class="fa-solid fa-chevron-left"></i>
+  </button>
+
+  <div class="bookshelf-viewport" id="bookshelf-viewport">
+    <div class="bookshelf-track" id="bookshelf-track">
       {% for item in collection reversed %}
-        <div class="library-card">
-          <div class="library-cover">
-            {% if item.cover %}
-              <img alt="{{ item.title }} cover" src="{{ item.cover | relative_url }}">
-            {% elsif item.olid %}
-              <img alt="{{ item.title }} cover" src="https://covers.openlibrary.org/b/olid/{{ item.olid }}-L.jpg?default=false">
+        <button class="bookshelf-book" data-index="{{ forloop.index0 }}"
+          data-spine-color="{{ item.spineColor | default: '#555' }}"
+          data-text-color="{{ item.textColor | default: '#fff' }}"
+          data-title="{{ item.title }}"
+          data-author="{{ item.author }}"
+          data-stars="{{ item.stars }}"
+          data-buy-link="{{ item.buy_link }}"
+          {% if item.olid %}
+            data-cover="https://covers.openlibrary.org/b/olid/{{ item.olid }}-L.jpg"
+          {% elsif item.isbn %}
+            data-cover="https://covers.openlibrary.org/b/isbn/{{ item.isbn }}-L.jpg"
+          {% elsif item.cover %}
+            data-cover="{{ item.cover | relative_url }}"
+          {% endif %}
+        >
+          <!-- Spine -->
+          <div class="book-spine"
+            style="background-color: {{ item.spineColor | default: '#555' }}; color: {{ item.textColor | default: '#fff' }};">
+            <span class="book-spine-texture"></span>
+            <span class="book-spine-title">{{ item.title }}</span>
+          </div>
+          <!-- Cover -->
+          <div class="book-cover">
+            <span class="book-cover-texture"></span>
+            <span class="book-cover-binding"></span>
+            {% if item.olid %}
+              <img alt="{{ item.title }}" src="https://covers.openlibrary.org/b/olid/{{ item.olid }}-L.jpg" loading="lazy">
             {% elsif item.isbn %}
-              <img alt="{{ item.title }} cover" src="https://covers.openlibrary.org/b/isbn/{{ item.isbn }}-L.jpg?default=false">
+              <img alt="{{ item.title }}" src="https://covers.openlibrary.org/b/isbn/{{ item.isbn }}-L.jpg" loading="lazy">
+            {% elsif item.cover %}
+              <img alt="{{ item.title }}" src="{{ item.cover | relative_url }}" loading="lazy">
             {% endif %}
           </div>
-          <div class="library-info">
-            <strong class="library-title">{{ item.title }}</strong>
-            {% if item.author %}
-              <span class="library-subtitle">{{ item.author }}</span>
-            {% endif %}
-            {% if item.stars %}
-              <span class="library-stars">
-                {% assign full_stars = item.stars | floor %}
-                {% assign half_star = item.stars | minus: full_stars %}
-                {% assign empty_stars = 5 | minus: full_stars %}
-                {% if half_star > 0 %}
-                  {% assign empty_stars = empty_stars | minus: 1 %}
-                {% endif %}
-                {% for i in (1..full_stars) -%}
-                  <i class="fa-solid fa-star fa-sm"></i>
-                {%- endfor -%}
-                {%- if half_star > 0 %}<i class="fa-solid fa-star-half-stroke fa-sm"></i>{% endif -%}
-                {%- for i in (1..empty_stars) -%}
-                  <i class="fa-regular fa-star fa-sm"></i>
-                {%- endfor %}
-              </span>
-            {% endif %}
-            {% if item.buy_link %}
-              <a class="library-link" href="{{ item.buy_link }}" target="_blank" rel="noopener noreferrer">
-                <i class="fa-solid fa-cart-shopping"></i> Amazon
-              </a>
-            {% endif %}
-          </div>
-        </div>
+        </button>
       {% endfor %}
     </div>
+  </div>
+
+  <button class="bookshelf-arrow bookshelf-arrow-right" id="scroll-right" aria-label="Scroll right">
+    <i class="fa-solid fa-chevron-right"></i>
+  </button>
+</div>
+
+<!-- Detail panel below the shelf -->
+<div class="book-detail" id="book-detail" style="display:none;">
+  <div class="book-detail-inner">
+    <img class="book-detail-cover" id="detail-cover" alt="" src="">
+    <div class="book-detail-info">
+      <h3 id="detail-title"></h3>
+      <p class="book-detail-author" id="detail-author"></p>
+      <span class="book-detail-stars" id="detail-stars"></span>
+      <a class="book-detail-link" id="detail-link" href="#" target="_blank" rel="noopener noreferrer">
+        <i class="fa-solid fa-cart-shopping"></i> Amazon
+      </a>
+    </div>
+  </div>
+</div>
+
   {% endif %}
 {% endif %}
 
-<!-- Podcasts Section -->
+<!-- Podcasts Section (preserved) -->
 {% if site.data.podcasts and site.data.podcasts.size > 0 %}
   <h2 style="margin-top: 2.5rem;"><i class="fa-solid fa-podcast"></i> Podcasts</h2>
   <div class="library-grid podcast-grid">
@@ -90,6 +122,220 @@ layout: page
 {% endif %}
 
 <style>
+  /* === Bookshelf === */
+  .bookshelf-wrapper {
+    position: relative;
+    margin: 1.5rem 0 2rem;
+  }
+
+  .bookshelf-viewport {
+    overflow: hidden;
+    cursor: grab;
+  }
+
+  .bookshelf-track {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: transform 80ms linear;
+    padding: 16px 0;
+    will-change: transform;
+  }
+
+  /* Arrow buttons */
+  .bookshelf-arrow {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 32px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 6px;
+    color: var(--global-text-color, #333);
+    opacity: 0.5;
+    transition: opacity 0.2s, background 0.2s;
+  }
+  .bookshelf-arrow:hover {
+    opacity: 1;
+    background: var(--global-bg-color, rgba(0,0,0,0.04));
+  }
+  .bookshelf-arrow-left { left: -36px; }
+  .bookshelf-arrow-right { right: -36px; }
+
+  /* Individual book button */
+  .bookshelf-book {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    flex-shrink: 0;
+    outline: none;
+    border: none;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+    perspective: 1000px;
+    -webkit-perspective: 1000px;
+    gap: 0;
+    width: 42px;
+    transition: width 500ms ease;
+  }
+  .bookshelf-book.open {
+    width: 210px; /* spine 42 + cover 168 */
+  }
+
+  /* Spine */
+  .book-spine {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    width: 42px;
+    height: 220px;
+    flex-shrink: 0;
+    transform-origin: right;
+    transform: rotateY(0deg);
+    transition: transform 500ms ease;
+    filter: brightness(0.85) contrast(1.8);
+    transform-style: preserve-3d;
+    border-radius: 2px 0 0 2px;
+    overflow: hidden;
+  }
+  .bookshelf-book.open .book-spine {
+    transform: rotateY(-60deg);
+  }
+
+  .book-spine-texture {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    opacity: 0.35;
+    filter: url(#paper);
+  }
+
+  .book-spine-title {
+    margin-top: 12px;
+    font-size: 11px;
+    font-family: "DM Sans", system-ui, sans-serif;
+    font-weight: 600;
+    writing-mode: vertical-rl;
+    user-select: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    max-height: 196px;
+    z-index: 3;
+    letter-spacing: 0.02em;
+  }
+
+  /* Cover */
+  .book-cover {
+    position: relative;
+    flex-shrink: 0;
+    overflow: hidden;
+    width: 168px;
+    height: 220px;
+    transform-origin: left;
+    transform: rotateY(88.8deg);
+    transition: transform 500ms ease;
+    filter: brightness(0.85) contrast(1.8);
+    transform-style: preserve-3d;
+  }
+  .bookshelf-book.open .book-cover {
+    transform: rotateY(30deg);
+  }
+
+  .book-cover img {
+    width: 168px;
+    height: 220px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .book-cover-texture {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    opacity: 0.35;
+    filter: url(#paper);
+  }
+
+  .book-cover-binding {
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 3;
+    height: 100%;
+    width: 168px;
+    background: linear-gradient(
+      to right,
+      rgba(255,255,255,0) 2px,
+      rgba(255,255,255,0.5) 3px,
+      rgba(255,255,255,0.25) 4px,
+      rgba(255,255,255,0.25) 6px,
+      transparent 7px,
+      transparent 9px,
+      rgba(255,255,255,0.25) 9px,
+      transparent 12px
+    );
+  }
+
+  /* Detail panel */
+  .book-detail {
+    margin-top: 0.5rem;
+    padding: 1.25rem;
+    border-radius: 8px;
+    background: var(--global-code-bg-color, #f6f6f6);
+    animation: detailFadeIn 300ms ease;
+  }
+  @keyframes detailFadeIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .book-detail-inner {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+  }
+  .book-detail-cover {
+    width: 120px;
+    height: auto;
+    border-radius: 4px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+    flex-shrink: 0;
+  }
+  .book-detail-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .book-detail-info h3 {
+    margin: 0;
+    font-size: 1.1rem;
+  }
+  .book-detail-author {
+    margin: 0;
+    opacity: 0.65;
+    font-size: 0.9rem;
+  }
+  .book-detail-stars {
+    color: #f5c518;
+    font-size: 0.9rem;
+  }
+  .book-detail-link {
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+  }
+
+  /* Podcast grid (preserved) */
   .library-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -102,43 +348,21 @@ layout: page
     align-items: center;
     text-align: center;
   }
-  .library-cover img {
-    height: 240px;
-    width: auto;
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  }
   .library-info {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
     margin-top: 0.5rem;
   }
-  .library-title {
-    font-size: 0.95rem;
-  }
-  .library-subtitle {
-    font-size: 0.85rem;
-    opacity: 0.7;
-  }
-  .library-stars {
-    color: #f5c518;
-    font-size: 0.85rem;
-  }
-  .library-link {
-    font-size: 0.8rem;
-    margin-top: 0.25rem;
-  }
-  /* Podcast cards */
-  .podcast-grid {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  }
+  .library-title { font-size: 0.95rem; }
+  .library-subtitle { font-size: 0.85rem; opacity: 0.7; }
+  .library-link { font-size: 0.8rem; margin-top: 0.25rem; }
   .podcast-cover img {
     width: 140px;
     height: 140px;
     border-radius: 16px;
     object-fit: cover;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
   }
   .podcast-icon {
     width: 140px;
@@ -150,11 +374,113 @@ layout: page
     font-size: 2.5rem;
     background: var(--global-theme-color, #6c63ff);
     color: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
   }
-  .podcast-desc {
-    font-size: 0.78rem;
-    opacity: 0.6;
-    line-height: 1.3;
+  .podcast-desc { font-size: 0.78rem; opacity: 0.6; line-height: 1.3; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .bookshelf-arrow-left { left: -28px; }
+    .bookshelf-arrow-right { right: -28px; }
+    .bookshelf-arrow { width: 24px; }
+    .book-detail-inner { flex-direction: column; align-items: center; text-align: center; }
+    .book-detail-cover { width: 100px; }
   }
 </style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var track = document.getElementById("bookshelf-track");
+    var viewport = document.getElementById("bookshelf-viewport");
+    var books = document.querySelectorAll(".bookshelf-book");
+    var scrollLeftBtn = document.getElementById("scroll-left");
+    var scrollRightBtn = document.getElementById("scroll-right");
+    var detail = document.getElementById("book-detail");
+    var openIndex = -1;
+    var scrollX = 0;
+
+    function getMaxScroll() {
+      var extra = openIndex > -1 ? 168 : 0;
+      return Math.max(0, track.scrollWidth + extra - viewport.clientWidth);
+    }
+
+    function setScroll(val) {
+      scrollX = Math.max(0, Math.min(getMaxScroll(), val));
+      track.style.transform = "translateX(-" + scrollX + "px)";
+      scrollLeftBtn.style.display = scrollX > 0 ? "flex" : "none";
+      scrollRightBtn.style.display = scrollX < getMaxScroll() - 1 ? "flex" : "none";
+    }
+
+    // Arrow continuous scroll
+    var scrollInterval = null;
+    function startScroll(dir) {
+      scrollInterval = setInterval(function () { setScroll(scrollX + dir * 3); }, 10);
+    }
+    function stopScroll() { if (scrollInterval) { clearInterval(scrollInterval); scrollInterval = null; } }
+
+    scrollRightBtn.addEventListener("mouseenter", function () { startScroll(1); });
+    scrollRightBtn.addEventListener("mouseleave", stopScroll);
+    scrollRightBtn.addEventListener("touchstart", function () { startScroll(1); });
+    scrollRightBtn.addEventListener("touchend", stopScroll);
+    scrollLeftBtn.addEventListener("mouseenter", function () { startScroll(-1); });
+    scrollLeftBtn.addEventListener("mouseleave", stopScroll);
+    scrollLeftBtn.addEventListener("touchstart", function () { startScroll(-1); });
+    scrollLeftBtn.addEventListener("touchend", stopScroll);
+
+    // Book click
+    books.forEach(function (book) {
+      book.addEventListener("click", function () {
+        var idx = parseInt(book.dataset.index, 10);
+
+        if (idx === openIndex) {
+          book.classList.remove("open");
+          openIndex = -1;
+          detail.style.display = "none";
+          setScroll(scrollX);
+          return;
+        }
+
+        // Close previous
+        if (openIndex > -1) {
+          books[openIndex].classList.remove("open");
+        }
+
+        book.classList.add("open");
+        openIndex = idx;
+
+        // Populate detail
+        document.getElementById("detail-title").textContent = book.dataset.title;
+        document.getElementById("detail-author").textContent = book.dataset.author;
+        var cover = document.getElementById("detail-cover");
+        cover.src = book.dataset.cover || "";
+        cover.alt = book.dataset.title;
+        cover.style.display = book.dataset.cover ? "block" : "none";
+
+        var stars = parseInt(book.dataset.stars, 10) || 0;
+        var starsHtml = "";
+        for (var s = 0; s < stars; s++) starsHtml += '<i class="fa-solid fa-star fa-sm"></i>';
+        for (var e = stars; e < 5; e++) starsHtml += '<i class="fa-regular fa-star fa-sm"></i>';
+        document.getElementById("detail-stars").innerHTML = starsHtml;
+
+        var link = document.getElementById("detail-link");
+        if (book.dataset.buyLink) {
+          link.href = book.dataset.buyLink;
+          link.style.display = "inline";
+        } else {
+          link.style.display = "none";
+        }
+
+        detail.style.display = "block";
+
+        // Scroll to center the opened book
+        var bookLeft = book.offsetLeft;
+        var center = bookLeft - viewport.clientWidth / 2 + 105;
+        setScroll(center);
+      });
+    });
+
+    // Init
+    setScroll(0);
+    window.addEventListener("resize", function () { setScroll(scrollX); });
+  });
+</script>
