@@ -108,6 +108,11 @@ ninja.data = [{
           description: "",
           section: "Books",handler: () => {
               window.location.href = "/books/einstein/";
+            },},{id: "books-mindstorms",
+          title: 'Mindstorms',
+          description: "",
+          section: "Books",handler: () => {
+              window.location.href = "/books/mindstorms/";
             },},{id: "books-elon-musk",
           title: 'Elon Musk',
           description: "",
@@ -118,6 +123,11 @@ ninja.data = [{
           description: "",
           section: "Books",handler: () => {
               window.location.href = "/books/the_alchemist/";
+            },},{id: "books-the-dream-machine",
+          title: 'The Dream Machine',
+          description: "",
+          section: "Books",handler: () => {
+              window.location.href = "/books/the_dream_machine/";
             },},{id: "books-the-worlds-i-see",
           title: 'The Worlds I See',
           description: "",
