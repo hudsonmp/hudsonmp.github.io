@@ -1,8 +1,8 @@
 ---
 layout: post
-date: 2026-06-01 12:00:00-0700
+date: 2026-03-29 12:00:00-0700
 inline: true
 related_posts: false
 ---
 
-Seeking unpaid RAship at CMU for Summer 2026.
+Research position with <a href="https://website.cs.vt.edu/people/faculty/david-h-smith-iv.html">Professor David H. Smith IV</a> at Virginia Tech this summer.
