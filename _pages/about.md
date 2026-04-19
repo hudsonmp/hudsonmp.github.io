@@ -2,7 +2,7 @@
 layout: about
 title: about
 permalink: /
-subtitle: "[Virginia Tech](http://vt.edu/), [UC San Diego](https://ucsd.edu), [Art of Problem Solving](https://artofproblemsolving.com)"
+subtitle: "[Papert Lab](https://papertlab.org)"
 
 profile:
   align: right
@@ -26,7 +26,7 @@ latest_posts:
   limit: 3 # leave blank to include all the blog posts
 ---
 
-I'm 16 and in high school. I enjoy being around interesting people. I am delighted by reading *computer science education* research papers in quiet libraries.
+I'm 16 and in high school. I enjoy being around interesting people. I am delighted by reading papers, memoirs, and texts in quiet libraries and closets. I conduct research at [Virginia Tech](http://vt.edu/) in computing education.
 
 I research **human-AI interaction** within **STEM education**. I also enjoy learning about math, computer science, cognitive science, developmental psychology, learning science, and physics. My interests lie in the use of **intelligent tutoring systems** and pedagogical AI tutors to support advanced problem solving, critical thinking, and end-user programming. I am mentored by [Annapurna Vadaparty](https://apvadaparty.github.io/), [David Smith](https://hamiltonfour.tech/), and [Qianou Ma](https://qianouma.com/).
 
