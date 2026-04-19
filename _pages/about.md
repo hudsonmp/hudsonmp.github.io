@@ -2,7 +2,7 @@
 layout: about
 title: about
 permalink: /
-subtitle: "[Patrick Henry High School](http://patrickhenryhs.net/), [UC San Diego](https://ucsd.edu), [Art of Problem Solving](https://artofproblemsolving.com)"
+subtitle: "[Virginia Tech](http://vt.edu/), [UC San Diego](https://ucsd.edu), [Art of Problem Solving](https://artofproblemsolving.com)"
 
 profile:
   align: right
