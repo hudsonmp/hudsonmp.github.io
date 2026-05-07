@@ -7,4 +7,4 @@ nav: true
 nav_order: 2
 ---
 
-[GSDSEF 2026 Poster](/assets/pdf/gsdsef-poster-2026.pdf)
+[GSDSEF 2026 Poster](https://papertlab.org/assets/gsdsef-poster-2026.pdf)
